@@ -4,6 +4,7 @@ import cors from 'cors'
 import "dotenv/config.js"
 
 import userRoutes from './routes/user_routes.js'
+import adminRoutes from "./routes/admin_routes.js"
 import { init } from "./socket.io.js"
 
 
@@ -18,9 +19,7 @@ server.use(cors({
 
 server.use("/user", userRoutes)
 
-server.use("/admin", (req, res) => {
-    console.log("")
-})
+server.use("/admin", adminRoutes)
 
 server.use((req, res) => {
     return res.status(404).json("Page not found!")
