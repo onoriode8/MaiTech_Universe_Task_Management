@@ -3,7 +3,7 @@ import { check } from 'express-validator'
 
 
 import { login, register } from '../controllers/user/authentication.js'
-import { addTask, getTasks, putTask } from '../controllers/user/task.js'
+import { addTask, getTasks, putTask, deleteTask } from '../controllers/user/task.js'
 import authJwt from '../middleware/jwt.js'
 
 
@@ -31,7 +31,7 @@ router.put("/tasks/:id", authJwt,
     check("description").notEmpty().isLength({ min: 4 }), putTask)
 
 //delete route => /user/task/:id
-// router.delete("/tasks/:id")
+router.delete("/tasks/:id", authJwt, deleteTask)
 
 
 export default router;

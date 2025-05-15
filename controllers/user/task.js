@@ -127,3 +127,44 @@ export const putTask = async (req, res) => {
         return res.status(500).json("Server Error")
     }
 }
+
+export const deleteTask = async (req, res) => {
+    const taskId = req.params.id
+    const userId = req.decodedUserId
+
+    let existingUser
+    try {
+        existingUser = await User.findById(userId).populate("tasks")
+    } catch(err) {
+        return res.status(500).json("Internal Server Error")
+    }
+    if(!existingUser) {
+        return res.status(404).json("User not found.")
+    }
+    console.log("EXISTING_USER", existingUser)
+
+    try {
+        const sess = await startSession()
+        sess.startTransaction()
+        const task = await Task.findById(taskId)
+        if(!task) {
+            return res.status(404).json("You don't have any task to delete.")
+        }
+
+        if(existingUser._id.toString() !== task.creatorId.toString()) {
+            return res.status(401).json("Unauthorize access. You are not allowed to access this route.")
+        }
+        console.log('EXISTING_USER', existingUser.tasks)
+        await sess.commitTransaction()
+        await task.remove({ session: sess })
+        existingUser.tasks.pull(taskId) // check if it works later.
+        console.log("TASK REMOVED", task)
+        await Promise.all([
+            await existingUser.save({ session: sess }),
+            await task.save({ session: sess })
+        ])
+        return res.status(200).json("Your task was deleted successful.")
+    } catch(err) {
+        return res.status(500).json("Server Error")
+    }
+}
