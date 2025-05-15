@@ -141,30 +141,27 @@ export const deleteTask = async (req, res) => {
     if(!existingUser) {
         return res.status(404).json("User not found.")
     }
-    console.log("EXISTING_USER", existingUser)
 
     try {
         const sess = await startSession()
         sess.startTransaction()
-        const task = await Task.findById(taskId)
+        const task = await Task.findById(taskId).session(sess)
         if(!task) {
+            await sess.abortTransaction()
             return res.status(404).json("You don't have any task to delete.")
         }
 
         if(existingUser._id.toString() !== task.creatorId.toString()) {
+            await sess.abortTransaction()
             return res.status(401).json("Unauthorize access. You are not allowed to access this route.")
         }
-        console.log('EXISTING_USER', existingUser.tasks)
+        existingUser.tasks.pull(taskId) 
+        await existingUser.save() 
+        await task.deleteOne({ session: sess })
         await sess.commitTransaction()
-        await task.remove({ session: sess })
-        existingUser.tasks.pull(taskId) // check if it works later.
-        console.log("TASK REMOVED", task)
-        await Promise.all([
-            await existingUser.save({ session: sess }),
-            await task.save({ session: sess })
-        ])
         return res.status(200).json("Your task was deleted successful.")
     } catch(err) {
+        await sess.abortTransaction()
         return res.status(500).json("Server Error")
     }
 }
