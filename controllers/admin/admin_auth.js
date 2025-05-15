@@ -4,7 +4,8 @@ import jwt from 'jsonwebtoken'
 import "dotenv/config.js"
 
 
-import AdminModel from '../../model/admin/admin.js'
+import UserModel from '../../model/user/user.js'
+
 import { expressValidatorHelper, nodeMailerHelperFunc } from '../../middleware/helper.js'
 
 
@@ -18,7 +19,7 @@ export const adminLogin = async (req, res) => {
 
     let existingUsername;
     try {
-        existingUsername = await AdminModel.findOne({ username })
+        existingUsername = await UserModel.findOne({ username })
     } catch(err) {
         return res.status(500).json("Internal Server Error")
     }
@@ -44,8 +45,8 @@ export const adminLogin = async (req, res) => {
     let token;
     try {
         token = jwt.sign({ email: existingUsername.email, 
-            id: existingUsername._id }, 
-            process.env.ADMIN_JWT_SECRET_TOKEN, { expiresIn: "1h"})
+            id: existingUsername._id, role: "Admin" }, 
+            process.env.JWT_SECRET_TOKEN, { expiresIn: "1h"})
     } catch(err) { 
         return res.status(500).json("Server error")
     }
@@ -78,8 +79,8 @@ export const adminRegister = async(req, res) => {
     }
 
     try {
-        const existingEmail = await AdminModel.findOne({ email })
-        const existingUsername = await AdminModel.findOne({ username })
+        const existingEmail = await UserModel.findOne({ email })
+        const existingUsername = await UserModel.findOne({ username })
         if(existingEmail) {
             return res.status(400).json(`${
             existingEmail.email} already exist. Try login instead.`)
@@ -105,18 +106,19 @@ export const adminRegister = async(req, res) => {
         return res.status(404).json("failed to register an account. Try again later.")
     }
 
-    const createdAdminUser = new AdminModel({
+    const createdAdminUser = new UserModel({
         email,
         username,
         password: hashedPassword,
+        role: "Admin",
         tasks: []
     })
 
     let token;
     try {
         token = jwt.sign({ email: createdAdminUser.email, 
-            id: createdAdminUser._id }, 
-            process.env.ADMIN_JWT_SECRET_TOKEN, { expiresIn: "1h"})
+            id: createdAdminUser._id, role: "Admin" }, 
+            process.env.JWT_SECRET_TOKEN, { expiresIn: "1h"})
     } catch(err) { 
         return res.status(500).json("Server error")
     }

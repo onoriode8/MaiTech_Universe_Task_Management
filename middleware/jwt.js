@@ -11,6 +11,7 @@ const authJwt = (req, res, next) => {
             return res.status(400).json("You can't access this route.")
         }
         req.decodedUserId = decodedToken.id
+        req.role = decodedToken.role
         next()
     } catch(err) {
         if(err.name === "TokenExpiredError") {

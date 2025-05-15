@@ -2,8 +2,9 @@ import { validationResult } from 'express-validator'
 import { startSession } from 'mongoose'
 
 
-import User from '../../model/admin/admin.js'
-import Task from "../../model/admin/admin_tasks.js"
+// import Admin from '../../model/admin/admin.js'
+import Task from "../../model/user/tasks.js"
+import User from '../../model/user/user.js'
 
 import { expressValidatorHelper, nodeMailerHelperFunc } from '../../middleware/helper.js'
 
@@ -33,6 +34,7 @@ export const adminAddTask = async (req, res) => {
         title, 
         description,
         createdAt: new Date(),
+        role: req.role,
         creatorId: existingUser._id
     })
 
@@ -46,7 +48,7 @@ export const adminAddTask = async (req, res) => {
         existingUser.tasks.push(savedTask._id)
         await existingUser.save({ session: sess })
         const email = existingUser.email
-        const message = "Your created a new task."
+        const message = "You created a new task as an Admin."
         nodeMailerHelperFunc(email, message)
         return res.status(201).json("Task created successful")
     } catch(err) {
@@ -55,14 +57,13 @@ export const adminAddTask = async (req, res) => {
 }
 
 export const adminGetTasks = async (req, res) => {
-    const userId = req.decodedUserId;
+    const adminUserId = req.decodedUserId;
 
     let tasks;
     try {
-        tasks = await User.findById({ _id: userId })
-            .select("-password").populate("tasks").exec()
+        tasks = await Task.find()
     } catch(err) {
-        return res.status(500).json(err.message)
+        return res.status(500).json("Internal Server Error")
     }
     if(!tasks) {
         return res.status(404).json("No task is created yet.")
@@ -74,7 +75,7 @@ export const adminGetTasks = async (req, res) => {
 
 export const adminPutTask = async (req, res) => {
     const { title, description } = req.body;
-    const userId = req.decodedUserId //from jwt middleware
+    const userId = req.decodedUserId
     const taskId = req.params.id
     if(taskId.length < 24) {
         return res.status(422).json("Invalid id provided.")
@@ -107,7 +108,7 @@ export const adminPutTask = async (req, res) => {
         return res.status(404).json("You don't have any task created.")
     }
     
-    if(existingUser._id.toString() !== tasks.creatorId.toString()) {
+    if(req.role !== "Admin") {
         return res.status(401).json("Unauthorize access. You are not allowed to access this route.")
     }
 
@@ -124,40 +125,43 @@ export const adminPutTask = async (req, res) => {
     }
 }
 
+
 export const adminDeleteTask = async (req, res) => {
     const taskId = req.params.id
-    const userId = req.decodedUserId
 
-    let existingUser
+    let task;
     try {
-        existingUser = await User.findById(userId).populate("tasks")
+        task = await Task.findById(taskId)
     } catch(err) {
         return res.status(500).json("Internal Server Error")
     }
+
+    if(!task) {
+        return res.status(404).json("Task not found.")
+    }
+
+    let existingUser
+    try {
+        const id = task.creatorId.toString()
+        existingUser = await User.findById(id).populate("tasks") 
+    } catch(err) {
+        return res.status(500).json("Internal Server Error")
+    }
+
     if(!existingUser) {
         return res.status(404).json("User not found.")
     }
 
-    try {
-        const sess = await startSession()
-        sess.startTransaction()
-        const task = await Task.findById(taskId).session(sess)
-        if(!task) {
-            await sess.abortTransaction()
-            return res.status(404).json("You don't have any task to delete.")
-        }
+    if(req.role !== "Admin") {
+        return res.status(401).json("Unauthorize access. You are not allowed to access this route.")
+    }
 
-        if(existingUser._id.toString() !== task.creatorId.toString()) {
-            await sess.abortTransaction()
-            return res.status(401).json("Unauthorize access. You are not allowed to access this route.")
-        }
-        existingUser.tasks.pull(taskId) 
+    try {
+        await task.deleteOne()
+        existingUser.tasks.pull(taskId)
         await existingUser.save() 
-        await task.deleteOne({ session: sess })
-        await sess.commitTransaction()
         return res.status(200).json("Your task was deleted successful.")
     } catch(err) {
-        await sess.abortTransaction()
         return res.status(500).json("Server Error")
     }
 }

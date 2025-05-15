@@ -33,6 +33,7 @@ export const addTask = async (req, res) => {
         title, 
         description,
         createdAt: new Date(),
+        role: req.role,
         creatorId: existingUser._id
     })
 
@@ -50,7 +51,7 @@ export const addTask = async (req, res) => {
             title, description
         })
         const email = existingUser.email
-        const message = "Your created a new task."
+        const message = "You created a new task."
         nodeMailerHelperFunc(email, message)
         return res.status(201).json("Task created successful")
     } catch(err) {

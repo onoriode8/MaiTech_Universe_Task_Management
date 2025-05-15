@@ -3,9 +3,9 @@ import { check } from 'express-validator'
 
 
 import { adminLogin, adminRegister } from '../controllers/admin/admin_auth.js'
-// import { adminAddTask, adminGetTasks, adminPutTask, adminDeleteTask } from '../controllers/admin/admin_task.js'
-import adminAuthJwt from '../middleware/admin_jwt.js'
-
+import { adminAddTask, adminGetTasks, adminPutTask, adminDeleteTask } from '../controllers/admin/admin_task.js'
+import AuthJwt from '../middleware/jwt.js'
+import authorize from '../middleware/authorize.js'
 
 const router = express.Router()
 
@@ -19,19 +19,21 @@ router.post("/register", check("email").isEmail().normalizeEmail(),
     check("username").notEmpty().isLength({ min: 4 }), adminRegister)
 
 //post route => /admin/tasks
-// router.post("/tasks", adminAuthJwt, check("title").notEmpty(), 
-//     check("description").notEmpty(), adminAddTask)
+router.post("/tasks", AuthJwt, authorize(["Admin", "Member"]),
+    check("title").notEmpty(), check("description").notEmpty(), adminAddTask)
 
-//get route => /admin/get
-// router.get("/tasks", adminAuthJwt, adminGetTasks)
+//get route => /admin/tasks
+router.get("/tasks", AuthJwt, 
+    authorize(["Admin", "Member"]), adminGetTasks)
 
-//put route => /admin/put/:id
-// router.put("/tasks/:id", adminAuthJwt,
-//     check("title").notEmpty().isLength({ min: 5 }),
-//     check("description").notEmpty().isLength({ min: 4 }), adminPutTask)
+//put route => /admin/tasks/:id
+router.put("/tasks/:id", AuthJwt, authorize(["Admin", "Member"]),
+    check("title").notEmpty().isLength({ min: 5 }),
+    check("description").notEmpty().isLength({ min: 4 }), adminPutTask)
 
 //delete route => /admin/task/:id
-// router.delete("/tasks/:id", adminAuthJwt, adminDeleteTask)
+router.delete("/tasks/:id", AuthJwt, 
+    authorize(["Admin", "Member"]), adminDeleteTask)
 
 
 export default router;
