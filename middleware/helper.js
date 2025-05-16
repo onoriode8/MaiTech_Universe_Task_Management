@@ -17,15 +17,15 @@ export const expressValidatorHelper = (errorResult) => {
 
 export const nodeMailerHelperFunc = (email, message) => {
     const transporter = nodemailer.createTransport({
-        service: process.env.GOOGLE_SERVICE,
+        service: "gmail", //process.env.GOOGLE_SERVICE,
         secure: true,
         auth: {
-            user: process.env.GOOGLE_SERVICE_ACCOUNT_USER,
-            pass: process.env.GOOGLE_SERVICE_PASSWORD
+            user: "onosmaster2@gmail.com", //process.env.GOOGLE_SERVICE_ACCOUNT_USER,
+            pass: "sztb mghp hvvi mxsm" //process.env.GOOGLE_SERVICE_PASSWORD
         }
     })
     const mailOptions = {
-        from: process.env.GOOGLE_SERVICE_ACCOUNT_USER,
+        from: "onosmaster2@gmail.com", //process.env.GOOGLE_SERVICE_ACCOUNT_USER,
         to: email,
         subject: "MaiTech Universe Intern",
         text: message

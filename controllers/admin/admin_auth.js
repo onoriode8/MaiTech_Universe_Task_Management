@@ -46,7 +46,8 @@ export const adminLogin = async (req, res) => {
     try {
         token = jwt.sign({ email: existingUsername.email, 
             id: existingUsername._id, role: "Admin" }, 
-            process.env.JWT_SECRET_TOKEN, { expiresIn: "1h"})
+            "SECRET_TASK_MANAGEMENT_PROJECT_UNIVERSE_PRIVATE", 
+            { expiresIn: "1h"})
     } catch(err) { 
         return res.status(500).json("Server error")
     }
@@ -118,7 +119,8 @@ export const adminRegister = async(req, res) => {
     try {
         token = jwt.sign({ email: createdAdminUser.email, 
             id: createdAdminUser._id, role: "Admin" }, 
-            process.env.JWT_SECRET_TOKEN, { expiresIn: "1h"})
+            "SECRET_TASK_MANAGEMENT_PROJECT_UNIVERSE_PRIVATE",
+            { expiresIn: "1h"})
     } catch(err) { 
         return res.status(500).json("Server error")
     }
