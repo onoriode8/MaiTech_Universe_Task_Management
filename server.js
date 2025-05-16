@@ -22,7 +22,7 @@ server.use("/user", userRoutes)
 server.use("/admin", adminRoutes)
 
 server.use((req, res) => {
-    return res.status(404).json("Page not found!")
+    return res.status(404).json({})
 })
 
 server.use((error, req, res, next) => {
