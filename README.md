@@ -8,6 +8,12 @@
 4. #### implemented role-based access control (RBAC).
 5. #### the system also protect routes based on user roles (Admin vs Member).
 6. #### Added email notification when a task is created and updated with nodemailer and gmail.
-7. #### Also Performed ACID operation. Atomicity, consistency, isolation, and durability for rolled back transaction if sometime failed. Otherwise they all succeed.
+7. #### Also Performed ACID operation. Atomicity, consistency, isolation, and durability for rolled back transaction if sometime fails. Otherwise they all succeed.
+
+### Developer Instructions
+1. #### clone this working respository, with git clone url.
+2. #### Cd to directory. 
+3. #### Run npm install to install all dependencies.
+4. #### Run npm start to run on production / npm run dev on development.
 
 ##### Tech Stack: Node.js with Express, JWT, Bcrypt, Socket.io, Nodemailer, mongoose for Database query, RESTful architecture.
