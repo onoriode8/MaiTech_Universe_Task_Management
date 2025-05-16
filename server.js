@@ -29,14 +29,12 @@ server.use((error, req, res, next) => {
     console.log("Catch Error that occurs.")
 })
 
-const MONGO_DB_URL = "mongodb+srv://task_management:mQXWJKu0N2gfO8rw@cluster0.e3pic.mongodb.net/TaskManagement"
-const NODE_ENV = "Production"
 
-connect(MONGO_DB_URL)
+connect(process.env.MONGO_DB_URL)
     .then(response => {
         const httpServer = server.listen(8000, () => {
-            {NODE_ENV === "development" ?
-                console.log(`app is running on port "http://localhost:8000"`) 
+            {process.env.NODE_ENV === "development" ?
+                console.log(`app is running on port ${process.env.BACKEND_URL}`) 
                 :
                 console.log("Running on production.")
             }
@@ -50,7 +48,7 @@ connect(MONGO_DB_URL)
         })
     })
     .catch(err => {
-        if(NODE_ENV === "development") {
+        if(process.env.NODE_ENV === "development") {
             console.log("error", err.message)
         }
     })
