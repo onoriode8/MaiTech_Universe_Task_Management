@@ -1,5 +1,9 @@
 ## BACKEND TASK MANAGEMENT PROJECT FROM MAITECH UNIVERSE
 
+#### Login details:
+#### Admin: username: Admin_1  password: password12345 
+#### Memeber: email: member@gmail.com  username: Member_1  password: password54321
+
 ### Goal: Build a secure and scalable REST API  with Admin and Member to support the frontend task management system.
 
 1. #### Develop the API endpoints with RESTFUL architecture.
